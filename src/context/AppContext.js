@@ -42,13 +42,16 @@ export const AppContextProvider = ({ children }) => {
     });
   };
 
+  const mapRoomId = (r) => ({ ...r, id: r.id || r._id });
+  const mapBookingId = (b) => ({ ...b, id: b.id || b._id });
+
   // Fetch Rooms from server
   const fetchRooms = async () => {
     try {
       const response = await fetch(`${API_BASE}/rooms`);
       const data = await response.json();
       if (data.success) {
-        setRooms(data.data);
+        setRooms(data.data.map(mapRoomId));
       }
     } catch (err) {
       console.error("Error fetching rooms:", err);
@@ -63,7 +66,7 @@ export const AppContextProvider = ({ children }) => {
       });
       const data = await response.json();
       if (data.success) {
-        setBookings(data.data);
+        setBookings(data.data.map(mapBookingId));
       }
     } catch (err) {
       console.error("Error fetching bookings:", err);
@@ -89,7 +92,7 @@ export const AppContextProvider = ({ children }) => {
           });
           const bookingsData = await bookingsResponse.json();
           if (bookingsData.success) {
-            setBookings(bookingsData.data);
+            setBookings(bookingsData.data.map(mapBookingId));
           }
         } else {
           setCurrentUser(null);
