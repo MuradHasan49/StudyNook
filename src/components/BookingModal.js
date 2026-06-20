@@ -62,7 +62,7 @@ export default function BookingModal({ room, onClose }) {
     }
   }, [startTime, endTime, room.hourlyRate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Verify date is not in the past
@@ -84,7 +84,7 @@ export default function BookingModal({ room, onClose }) {
     }
 
     // Call Context action
-    const res = bookRoom({
+    const res = await bookRoom({
       roomId: room.id,
       date,
       startTime,

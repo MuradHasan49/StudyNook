@@ -51,7 +51,7 @@ export default function AddRoom() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (parseFloat(hourlyRate) < 0) {
@@ -63,7 +63,7 @@ export default function AddRoom() {
       return;
     }
 
-    const res = addRoom({
+    const res = await addRoom({
       name,
       description,
       image,

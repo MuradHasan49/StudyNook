@@ -18,6 +18,7 @@ export const AppContextProvider = ({ children }) => {
   const getAuthToken = async () => {
     try {
       const res = await authClient.token();
+      console.log(res)
       if (res && res.data) {
         return res.data.token;
       }
@@ -99,7 +100,7 @@ export const AppContextProvider = ({ children }) => {
       } finally {
         // Fetch public rooms list
         await fetchRooms();
-        
+
         // Setup Theme settings
         const storedTheme = localStorage.getItem("study_nook_theme");
         const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -110,7 +111,7 @@ export const AppContextProvider = ({ children }) => {
         } else {
           document.documentElement.classList.remove("dark");
         }
-        
+
         setLoading(false);
       }
     };
@@ -153,7 +154,7 @@ export const AppContextProvider = ({ children }) => {
           photoUrl: res.data.user.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
         };
         setCurrentUser(loggedUser);
-        
+
         // Fetch their bookings
         await fetchMyBookings();
         return { success: true, user: loggedUser };

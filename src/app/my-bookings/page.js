@@ -54,8 +54,8 @@ export default function MyBookings() {
     setShowCancelModal(true);
   };
 
-  const handleConfirmCancel = () => {
-    const res = cancelBooking(selectedBookingId);
+  const handleConfirmCancel = async () => {
+    const res = await cancelBooking(selectedBookingId);
     setShowCancelModal(false);
     if (res.success) {
       toast.success("Booking cancelled successfully.");

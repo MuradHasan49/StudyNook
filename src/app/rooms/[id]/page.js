@@ -73,7 +73,7 @@ export default function RoomDetails({ params }) {
   const isOwner = currentUser && room.ownerId === currentUser.id;
 
   // Edit Room submit
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
 
     if (parseFloat(editHourlyRate) < 0 || parseInt(editCapacity) < 1) {
@@ -81,7 +81,7 @@ export default function RoomDetails({ params }) {
       return;
     }
 
-    const res = updateRoom(room.id, {
+    const res = await updateRoom(room.id, {
       name: editName,
       description: editDescription,
       image: editImage,
@@ -100,8 +100,8 @@ export default function RoomDetails({ params }) {
   };
 
   // Delete Room action
-  const handleDeleteConfirm = () => {
-    const res = deleteRoom(room.id);
+  const handleDeleteConfirm = async () => {
+    const res = await deleteRoom(room.id);
     if (res.success) {
       toast.success("Room deleted successfully.");
       router.push("/my-listings");
