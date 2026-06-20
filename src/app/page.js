@@ -106,7 +106,7 @@ export default function Home() {
 
               return (
                 <div
-                  key={room.id}
+                  key={room.id || room._id}
                   className="bg-white dark:bg-slate-900/60 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-800/80 overflow-hidden flex flex-col h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
                   {/* Uniform Image Size wrapper */}

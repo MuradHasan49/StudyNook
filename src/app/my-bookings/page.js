@@ -40,7 +40,7 @@ export default function MyBookings() {
   const isFutureBooking = (bookingDate) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Split date string to prevent local timezone offsets issues
     const [yyyy, mm, dd] = bookingDate.split("-");
     const bDate = new Date(yyyy, mm - 1, dd);

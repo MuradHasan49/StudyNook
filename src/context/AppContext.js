@@ -42,8 +42,32 @@ export const AppContextProvider = ({ children }) => {
     });
   };
 
-  const mapRoomId = (r) => ({ ...r, id: r.id || r._id });
-  const mapBookingId = (b) => ({ ...b, id: b.id || b._id });
+  const mapRoomId = (r) => {
+    if (!r) return r;
+    const id = r.id || r._id || (r._id ? r._id.toString() : null);
+    const ownerId = typeof r.owner === "object" && r.owner
+      ? (r.owner.id || r.owner._id || (r.owner._id ? r.owner._id.toString() : null))
+      : r.owner;
+    return {
+      ...r,
+      id,
+      ownerId
+    };
+  };
+
+  const mapBookingId = (b) => {
+    if (!b) return b;
+    const id = b.id || b._id || (b._id ? b._id.toString() : null);
+    const roomId = typeof b.roomId === "object" && b.roomId
+      ? (b.roomId.id || b.roomId._id || (b.roomId._id ? b.roomId._id.toString() : null))
+      : b.roomId;
+    return {
+      ...b,
+      id,
+      roomId,
+      specialNote: b.specialNote || b.note
+    };
+  };
 
   // Fetch Rooms from server
   const fetchRooms = async () => {
