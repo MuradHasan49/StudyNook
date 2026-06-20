@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 import dns from "dns";
+import { jwt } from "better-auth/plugins";
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
@@ -28,4 +29,14 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy_google_secret",
     },
   },
+  plugins: [
+    jwt({
+      jwks: {
+        keyPairConfig: {
+          alg: "RS256"
+        }
+      }
+    })
+  ],
 });
+

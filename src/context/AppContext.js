@@ -15,6 +15,32 @@ export const AppContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState("light");
 
+  const getAuthToken = async () => {
+    try {
+      const res = await authClient.token();
+      if (res && res.data) {
+        return res.data.token;
+      }
+    } catch (e) {
+      console.error("Error getting auth token:", e);
+    }
+    return null;
+  };
+
+  const authenticatedFetch = async (url, options = {}) => {
+    const token = await getAuthToken();
+    const headers = {
+      ...options.headers,
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return fetch(url, {
+      ...options,
+      headers,
+    });
+  };
+
   // Fetch Rooms from server
   const fetchRooms = async () => {
     try {
@@ -31,7 +57,7 @@ export const AppContextProvider = ({ children }) => {
   // Fetch Bookings for logged in user from server
   const fetchMyBookings = async () => {
     try {
-      const response = await fetch(`${API_BASE}/bookings/my`, {
+      const response = await authenticatedFetch(`${API_BASE}/bookings/my`, {
         credentials: "include"
       });
       const data = await response.json();
@@ -57,7 +83,7 @@ export const AppContextProvider = ({ children }) => {
             photoUrl: sessionUser.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
           });
           // Also fetch their bookings since they are logged in
-          const bookingsResponse = await fetch(`${API_BASE}/bookings/my`, {
+          const bookingsResponse = await authenticatedFetch(`${API_BASE}/bookings/my`, {
             credentials: "include"
           });
           const bookingsData = await bookingsResponse.json();
@@ -166,7 +192,7 @@ export const AppContextProvider = ({ children }) => {
   // Room CRUD Operations
   const addRoom = async (roomData) => {
     try {
-      const response = await fetch(`${API_BASE}/rooms`, {
+      const response = await authenticatedFetch(`${API_BASE}/rooms`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -196,7 +222,7 @@ export const AppContextProvider = ({ children }) => {
 
   const updateRoom = async (roomId, roomData) => {
     try {
-      const response = await fetch(`${API_BASE}/rooms/${roomId}`, {
+      const response = await authenticatedFetch(`${API_BASE}/rooms/${roomId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -218,7 +244,7 @@ export const AppContextProvider = ({ children }) => {
 
   const deleteRoom = async (roomId) => {
     try {
-      const response = await fetch(`${API_BASE}/rooms/${roomId}`, {
+      const response = await authenticatedFetch(`${API_BASE}/rooms/${roomId}`, {
         method: "DELETE",
         credentials: "include"
       });
@@ -241,7 +267,7 @@ export const AppContextProvider = ({ children }) => {
   // Booking Operations
   const bookRoom = async (bookingData) => {
     try {
-      const response = await fetch(`${API_BASE}/bookings`, {
+      const response = await authenticatedFetch(`${API_BASE}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -270,7 +296,7 @@ export const AppContextProvider = ({ children }) => {
 
   const cancelBooking = async (bookingId) => {
     try {
-      const response = await fetch(`${API_BASE}/bookings/${bookingId}/cancel`, {
+      const response = await authenticatedFetch(`${API_BASE}/bookings/${bookingId}/cancel`, {
         method: "PATCH",
         credentials: "include"
       });
