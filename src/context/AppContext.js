@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
 const AppContext = createContext();
 
@@ -46,16 +47,14 @@ export const AppContextProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const response = await fetch(`${API_BASE}/auth/me`, {
-          credentials: "include"
-        });
-        const data = await response.json();
-        if (data.success) {
+        const res = await authClient.getSession();
+        if (res && res.data && res.data.user) {
+          const sessionUser = res.data.user;
           setCurrentUser({
-            id: data.data._id,
-            name: data.data.name,
-            email: data.data.email,
-            photoUrl: data.data.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
+            id: sessionUser.id,
+            name: sessionUser.name,
+            email: sessionUser.email,
+            photoUrl: sessionUser.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
           });
           // Also fetch their bookings since they are logged in
           const bookingsResponse = await fetch(`${API_BASE}/bookings/my`, {
@@ -96,86 +95,65 @@ export const AppContextProvider = ({ children }) => {
   // Auth Operations
   const registerUser = async (name, email, photoUrl, password) => {
     try {
-      const response = await fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          photoURL: photoUrl,
-          password
-        })
+      const res = await authClient.signUp.email({
+        email,
+        password,
+        name,
+        image: photoUrl
       });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        return { success: true, message: "Registration successful! Please login." };
-      } else {
-        return { success: false, message: data.message || "Registration failed." };
+      if (res && res.error) {
+        return { success: false, message: res.error.message || "Registration failed." };
       }
+      return { success: true, message: "Registration successful! Please login." };
     } catch (err) {
-      return { success: false, message: "Could not connect to the backend server." };
+      return { success: false, message: "Could not connect to the auth server." };
     }
   };
 
   const loginUser = async (email, password) => {
     try {
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include"
+      const res = await authClient.signIn.email({
+        email,
+        password
       });
-      const data = await response.json();
-      if (response.ok && data.success) {
+      if (res && res.error) {
+        return { success: false, message: res.error.message || "Invalid email or password" };
+      }
+      if (res && res.data && res.data.user) {
         const loggedUser = {
-          id: data.data._id,
-          name: data.data.name,
-          email: data.data.email,
-          photoUrl: data.data.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
+          id: res.data.user.id,
+          name: res.data.user.name,
+          email: res.data.user.email,
+          photoUrl: res.data.user.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
         };
         setCurrentUser(loggedUser);
         
         // Fetch their bookings
         await fetchMyBookings();
         return { success: true, user: loggedUser };
-      } else {
-        return { success: false, message: data.message || "Invalid email or password" };
       }
+      return { success: false, message: "Authentication failed" };
     } catch (err) {
-      return { success: false, message: "Could not connect to the backend server." };
+      return { success: false, message: "Could not connect to the auth server." };
     }
   };
 
   // Google Login bridge to backend DB
   const loginWithGoogle = async () => {
-    const googleEmail = "google.explorer@gmail.com";
-    const googlePassword = "GoogleOAuthLogin1";
-    const googleName = "Google Explorer";
-    const googlePhoto = "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150";
-
-    // 1. Try to login
-    let res = await loginUser(googleEmail, googlePassword);
-    
-    // 2. If it fails, register first then login
-    if (!res.success) {
-      const regRes = await registerUser(googleName, googleEmail, googlePhoto, googlePassword);
-      if (regRes.success) {
-        res = await loginUser(googleEmail, googlePassword);
-      }
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/"
+      });
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: "Google sign-in error." };
     }
-    return res;
   };
 
   const logoutUser = async () => {
     try {
-      await fetch(`${API_BASE}/auth/logout`, {
-        method: "POST",
-        credentials: "include"
-      });
+      await authClient.signOut();
     } catch (err) {
       console.error("Logout backend call failed:", err);
     } finally {
