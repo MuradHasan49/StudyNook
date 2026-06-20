@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# StudyNook – Library Study Room Booking
 
-## Getting Started
+StudyNook is a premium, full-stack study room booking system designed for university libraries and cooperative workspaces. Students can easily browse available learning spaces, filter listings based on capacity, floor, or necessary amenities (such as whiteboards and projectors), and lock in their reservations with real-time conflict-free slot validation. Study room owners can easily create, manage, and edit their listings.
 
-First, run the development server:
+**Live Client URL**: [https://studynook-client.vercel.app](https://studynook-client.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌟 Key Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+* **Conflict-Free Hourly Booking**: Powered by robust backend validation to ensure zero overlapping reservation slots for the same room.
+* **JWT Cookie Session Authentication**: Implements HTTP-only JWT cookies to maintain secure sessions that persist reliably through page reloads.
+* **Dynamic Search & Multi-Filter Panel**: Instantly search rooms by name, floor selection, maximum hourly rates via range sliders, and active amenities checklist.
+* **Interactive Owner Dashboards**: User-friendly panels to list new study spaces (`/add-room`), edit listed attributes, delete rooms, or cancel future bookings with cancellation modals.
+* **Premium Responsive Design**: Supports beautiful light/dark theme toggles, smooth keyframe sliding animations, and unified card sizing across mobile, tablet, and desktop views.
+* **Google OAuth Simulation**: Instant login bridging that syncs simulated Google authentication directly with the user records database.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Technology Stack
 
-To learn more about Next.js, take a look at the following resources:
+**Frontend (Client)**:
+* Next.js 16 (App Router)
+* React 19
+* Tailwind CSS v4
+* Lucide React (Icons)
+* React Hot Toast (Notifications)
+* Framer Motion (Page Transitions)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Backend (Server)**:
+* Node.js & Express
+* Mongoose & MongoDB Atlas
+* JSON Web Tokens (JWT) & Cookie Parser
+* Bcrypt (Password Hashing)
+* Cors & Helmet (Security Headers)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🚀 Installation & Local Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. Backend Server Setup
+1. Navigate to the server folder:
+   ```bash
+   cd a09-server/server
+   ```
+2. Install npm dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file in the `server` directory and add your credentials:
+   ```env
+   PORT=5000
+   MONGODB_URI=your_mongodb_atlas_connection_string
+   JWT_SECRET=your_jwt_signing_key
+   CLIENT_URL=http://localhost:3000
+   ```
+4. Run the backend development server:
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Frontend Client Setup
+1. Navigate to the client folder:
+   ```bash
+   cd a09-client
+   ```
+2. Install npm dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the frontend development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) on your web browser.
