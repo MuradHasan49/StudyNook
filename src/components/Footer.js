@@ -7,7 +7,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300">
+    <footer className="relative bg-card border-t border-border transition-colors duration-300">
       {/* Top gradient accent line */}
       <div className="h-0.5 w-full bg-gradient-to-r from-primary-600 via-violet-500 to-indigo-600" />
 
@@ -90,7 +90,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-400">
             © {year} <span className="font-semibold text-slate-500 dark:text-slate-400">StudyNook</span>. All rights reserved.
           </p>

@@ -5,7 +5,7 @@ import React from "react";
 /* ── Card Skeleton ─────────────────────────────────── */
 export function CardSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border/75 overflow-hidden">
       <div className="skeleton h-48 w-full rounded-none" />
       <div className="p-5 space-y-3">
         <div className="skeleton h-5 w-3/4 rounded-lg" />
@@ -55,11 +55,11 @@ export function TableRowSkeleton() {
 /* ── Table Skeleton ─────────────────────────────────── */
 export function TableSkeleton({ rows = 5 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl overflow-hidden">
+    <div className="bg-card border border-border/75 rounded-3xl overflow-hidden">
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800">
+            <tr className="bg-slate-50/40 dark:bg-slate-950/40 border-b border-border/50">
               {["Room", "Date", "Time Slot", "Cost", "Status", "Actions"].map((h) => (
                 <th key={h} className="px-6 py-4 text-left">
                   <div className="skeleton h-3 w-16 rounded" />
@@ -67,7 +67,7 @@ export function TableSkeleton({ rows = 5 }) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+          <tbody className="divide-y divide-border/60">
             {Array.from({ length: rows }).map((_, i) => (
               <TableRowSkeleton key={i} />
             ))}
@@ -75,7 +75,7 @@ export function TableSkeleton({ rows = 5 }) {
         </table>
       </div>
       {/* Mobile */}
-      <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+      <div className="block md:hidden divide-y divide-border/60">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="p-5 space-y-3">
             <div className="flex gap-3">
@@ -116,7 +116,7 @@ export default function Loader({ message = "Loading..." }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-6 space-y-4">
       <div className="relative flex items-center justify-center">
-        <div className="h-16 w-16 rounded-full border-4 border-slate-200 dark:border-slate-800" />
+        <div className="h-16 w-16 rounded-full border-4 border-border" />
         <div className="absolute h-16 w-16 rounded-full border-4 border-t-primary-600 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
       </div>
       <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse text-sm">
