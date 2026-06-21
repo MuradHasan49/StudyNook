@@ -1,282 +1,488 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useApp } from "@/context/AppContext";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { 
-  ArrowRight, Shield, Zap, Coffee, Compass, 
-  MapPin, Users, DollarSign, Layers, Sparkles 
+import Card from "@/components/Card";
+import { CardsGridSkeleton } from "@/components/Loader";
+import {
+  ArrowRight, Shield, Zap, Coffee, Sparkles, BookOpen,
+  Users, Star, TrendingUp, ChevronLeft, ChevronRight
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
+
+// High-quality library & study room photos from Unsplash
+const heroSlides = [
+  {
+    url: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=85&w=1920",
+    alt: "Grand university library interior",
+    caption: "World-class university libraries",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=85&w=1920",
+    alt: "Rows of library books",
+    caption: "Quiet, focused study environments",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&q=85&w=1920",
+    alt: "Modern library reading room",
+    caption: "Modern collaborative spaces",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=85&w=1920",
+    alt: "Bright library study area",
+    caption: "Premium study rooms available now",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?auto=format&fit=crop&q=85&w=1920",
+    alt: "Students in a study room",
+    caption: "Boost your productivity",
+  },
+];
+
+function HeroSlideshow() {
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const count = heroSlides.length;
+
+  // Auto-advance every 4.5 seconds
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % count);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [isPaused, count]);
+
+  const prev = () => setCurrent((c) => (c - 1 + count) % count);
+  const next = () => setCurrent((c) => (c + 1) % count);
+
+  return (
+    <div
+      className="absolute inset-0"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Slides */}
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+          className="absolute inset-0"
+        >
+          <img
+            src={heroSlides[current].url}
+            alt={heroSlides[current].alt}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Gradient overlay — dark at bottom & top, semi-dark center for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/75" />
+      {/* Extra purple tint for brand feel */}
+      <div className="absolute inset-0 bg-primary-950/30 mix-blend-multiply" />
+
+      {/* Prev / Next arrows */}
+      <button
+        onClick={prev}
+        aria-label="Previous slide"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/30 hover:bg-black/60 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        onClick={next}
+        aria-label="Next slide"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/30 hover:bg-black/60 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+
+      {/* Dot indicators */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+        {heroSlides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`h-1.5 rounded-full transition-all duration-400 ${
+              i === current
+                ? "w-7 bg-white"
+                : "w-2 bg-white/40 hover:bg-white/70"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Caption */}
+      <div className="absolute bottom-10 right-6 z-10 hidden sm:block">
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={current}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.4 }}
+            className="text-[11px] font-semibold text-white/60 tracking-wider uppercase"
+          >
+            {heroSlides[current].caption}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const { rooms, loading } = useApp();
 
-  // Dynamic Browser Tab Title
   useEffect(() => {
-    document.title = "StudyNook – Home";
+    document.title = "StudyNook — Book Your Perfect Study Room";
   }, []);
 
-  // Sort and retrieve latest 6 rooms
   const latestRooms = [...rooms]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 6);
 
-  if (loading) {
-    return <LoadingSpinner message="Opening the StudyNook catalog..." />;
-  }
+  const perks = [
+    {
+      icon: Shield,
+      title: "Conflict-Free Booking",
+      desc: "Our database constraints prevent double-booking. Book with total confidence that your slot is exclusively yours.",
+      color: "from-primary to-violet-600",
+      bg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+    {
+      icon: Zap,
+      title: "Real-Time Approvals",
+      desc: "Skip waiting queues. Receive your instant reservation confirmation and unlock your private study room right away.",
+      color: "from-violet-500 to-indigo-600",
+      bg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+    {
+      icon: Coffee,
+      title: "Host & Earn Credit",
+      desc: "Got an unused room? List your slots to help other students study and receive monetary benefits or credit points.",
+      color: "from-amber-500 to-orange-600",
+      bg: "bg-amber-500/10",
+      iconColor: "text-amber-550 dark:text-amber-400",
+    },
+  ];
+
+  const steps = [
+    {
+      num: "01",
+      title: "Discover Study Nooks",
+      desc: "Filter spaces by capacity, floor, hourly rate, and required amenities like whiteboards or high-speed Wi-Fi.",
+      color: "bg-primary shadow-primary/30",
+    },
+    {
+      num: "02",
+      title: "Reserve Your Slot",
+      desc: "Pick a date and hour range. See real-time cost updates and confirm with instant conflict resolution.",
+      color: "bg-indigo-600 shadow-indigo-500/30",
+    },
+    {
+      num: "03",
+      title: "Unlock & Excel",
+      desc: "Access your bookings dashboard, walk in, hook up your screens, and start collaborating immediately.",
+      color: "bg-violet-600 shadow-violet-500/30",
+    },
+  ];
 
   return (
-    <div className="flex flex-col w-full animate-fade-in">
-      {/* 1. HERO BANNER */}
-      <section className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white overflow-hidden">
-        {/* Decorative subtle background shapes */}
-        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-500 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-10 w-72 h-72 bg-indigo-500 rounded-full blur-3xl"></div>
-        </div>
+    <div className="flex flex-col w-full">
+      {/* ─── HERO ─────────────────────────────────────────── */}
+      <section className="relative min-h-[85vh] flex items-center py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-slate-950">
+        {/* Photo slideshow background */}
+        <HeroSlideshow />
 
-        <div className="max-w-7xl mx-auto text-center relative z-10 space-y-6">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/35 text-primary-300 text-xs font-semibold uppercase tracking-wider mb-2">
-            <Sparkles className="h-3 w-3 animate-pulse text-accent-amber" />
-            University Room Booking Made Easy
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight max-w-4xl mx-auto">
-            Find Your Perfect <br />
-            <span className="bg-gradient-to-r from-primary-400 via-violet-300 to-indigo-300 bg-clip-text text-transparent">
-              Study Room
-            </span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-slate-350 max-w-2xl mx-auto leading-relaxed font-medium">
-            Browse and book quiet, private study rooms in your library. List your own room, manage bookings, and boost your productivity.
-          </p>
-
-          <div className="pt-6">
-            <Link
-              href="/rooms"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 text-base"
+        {/* Content (above slideshow) */}
+        <div className="max-w-7xl mx-auto w-full relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Badge */}
+            <motion.div
+              custom={0}
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm"
             >
-              Explore Rooms
-              <ArrowRight className="h-5 w-5" />
-            </Link>
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              University Room Booking — Reimagined
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              custom={1}
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.05] drop-shadow-lg"
+            >
+              Find Your Perfect{" "}
+              <span className="gradient-text-hero block sm:inline">
+                Study Room
+              </span>
+            </motion.h1>
+
+            {/* Subtext */}
+            <motion.p
+              custom={2}
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow"
+            >
+              Browse and book quiet, private study rooms in your library.
+              List your own space, manage bookings, and boost your productivity — all in one place.
+            </motion.p>
+
+            <motion.div
+              custom={3}
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
+            >
+              <Link
+                href="/rooms"
+                className="inline-flex items-center gap-2.5 px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-2xl shadow-primary/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 text-base"
+              >
+                Explore All Rooms
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+              <Link
+                href="/add-room"
+                className="inline-flex items-center gap-2.5 px-8 py-4 border border-white/30 hover:border-white/60 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-200 text-base backdrop-blur-sm"
+              >
+                <BookOpen className="h-5 w-5" />
+                List a Room
+              </Link>
+            </motion.div>
+
+            {/* Social proof */}
+            <motion.div
+              custom={4}
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="flex flex-wrap items-center justify-center gap-6 pt-4"
+            >
+              {[
+                { icon: Users, value: rooms.length > 0 ? `${rooms.length}+` : "10+", label: "Rooms Listed" },
+                { icon: Star, value: "4.9", label: "Avg. Rating" },
+                { icon: TrendingUp, value: "500+", label: "Bookings Made" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex items-center gap-2 text-white/60">
+                  <stat.icon className="h-4 w-4 text-primary" />
+                  <span className="font-bold text-white text-sm">{stat.value}</span>
+                  <span className="text-xs">{stat.label}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* 2. DYNAMIC SECTION - LATEST ROOMS */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="text-center md:text-left mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-white">
+      {/* ─── LATEST ROOMS ─────────────────────────────────── */}
+      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">
+              Fresh Listings
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
               Recently Listed Rooms
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-              Discover the latest quiet workspaces added to our inventory.
+            <p className="text-muted mt-2 max-w-xl leading-relaxed">
+              Discover the latest quiet workspaces freshly added to our growing inventory.
             </p>
-          </div>
+          </motion.div>
+
           <Link
             href="/rooms"
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-bold flex items-center gap-1 transition-colors self-center md:self-end"
+            className="flex items-center gap-1.5 text-sm font-bold text-primary hover:opacity-90 transition-colors group flex-shrink-0"
           >
-            See all study spots
-            <ArrowRight className="h-4 w-4" />
+            View all rooms
+            <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
-        {latestRooms.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-            <p className="text-slate-500">No rooms listed yet. Be the first to add one!</p>
+        {loading ? (
+          <CardsGridSkeleton count={6} />
+        ) : latestRooms.length === 0 ? (
+          <div className="text-center py-16 border-2 border-dashed border-border rounded-3xl">
+            <BookOpen className="h-12 w-12 text-muted/50 mx-auto mb-4" />
+            <p className="text-muted font-medium">
+              No rooms listed yet.{" "}
+              <Link href="/add-room" className="text-primary underline underline-offset-2">
+                Be the first to add one!
+              </Link>
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {latestRooms.map((room) => {
-              // Limit chips shown to max 3
-              const maxChips = 3;
-              const displayAmenities = room.amenities.slice(0, maxChips);
-              const remainingCount = room.amenities.length - maxChips;
-
-              // Truncate description to 100 characters
-              const truncatedDesc =
-                room.description.length > 100
-                  ? room.description.substring(0, 100) + "..."
-                  : room.description;
-
-              return (
-                <div
-                  key={room.id || room._id}
-                  className="bg-white dark:bg-slate-900/60 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-800/80 overflow-hidden flex flex-col h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  {/* Uniform Image Size wrapper */}
-                  <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-950">
-                    <img
-                      src={room.image}
-                      alt={room.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-                      <MapPin className="h-3 w-3 text-primary-450" />
-                      {room.floor}
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-5 flex flex-col flex-1 space-y-4">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-white truncate">
-                        {room.name}
-                      </h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 h-10 leading-relaxed">
-                        {truncatedDesc}
-                      </p>
-                    </div>
-
-                    {/* Stats capacity/rate */}
-                    <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 border-y border-slate-100 dark:border-slate-850 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <Users className="h-4 w-4 text-primary-500" />
-                        <span>Cap: {room.capacity}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4 text-accent-gold" />
-                        <span>${room.hourlyRate}/hr</span>
-                      </div>
-                    </div>
-
-                    {/* Amenities chips */}
-                    <div className="flex flex-wrap gap-1">
-                      {displayAmenities.map((amenity) => (
-                        <span
-                          key={amenity}
-                          className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                      {remainingCount > 0 && (
-                        <span className="bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 text-[10px] font-black px-2 py-0.5 rounded-full">
-                          +{remainingCount} more
-                        </span>
-                      )}
-                    </div>
-
-                    {/* View Details Button */}
-                    <div className="pt-2 mt-auto">
-                      <Link
-                        href={`/rooms/${room.id}`}
-                        className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-primary-100 dark:border-primary-900/40 text-sm font-bold text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white dark:hover:bg-primary-500 dark:hover:text-white rounded-xl transition duration-200"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {latestRooms.map((room, index) => (
+              <Card key={room.id || room._id} room={room} index={index} />
+            ))}
           </div>
         )}
       </section>
 
-      {/* 3. EXTRA STATIC SECTION 1 - STUDYNOOK PERKS */}
-      <section className="py-20 bg-slate-100 dark:bg-slate-900/30 border-y border-slate-200/50 dark:border-slate-800/40">
+      {/* ─── PERKS ────────────────────────────────────────── */}
+      <section className="py-24 bg-slate-50/50 dark:bg-slate-900/20 border-y border-border/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-white">
-              Why Book With StudyNook?
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">
-              We design features that streamline your learning, collaborating, and room hosting experience.
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto mb-16 space-y-4"
+          >
+            <p className="text-xs font-bold text-primary uppercase tracking-widest">
+              Why StudyNook?
             </p>
-          </div>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
+              Built for serious students
+            </h2>
+            <p className="text-muted leading-relaxed">
+              We design features that streamline your learning, collaboration, and room hosting experience from end to end.
+            </p>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Perk 1 */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-              <div className="p-3 bg-primary-100 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400 rounded-2xl w-fit">
-                <Shield className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Conflict-Free Booking</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Our database constraints prevent double-booking. Book with total confidence that your room is yours at your selected time slot.
-              </p>
-            </div>
-
-            {/* Perk 2 */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-              <div className="p-3 bg-violet-100 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 rounded-2xl w-fit">
-                <Zap className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Real-Time Approvals</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Skip standard waiting queues. Book rooms, receive your instant reservation pass, and unlock the private room straight away.
-              </p>
-            </div>
-
-            {/* Perk 3 */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
-              <div className="p-3 bg-amber-100 dark:bg-amber-955/50 text-amber-600 dark:text-amber-400 rounded-2xl w-fit">
-                <Coffee className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Host & Earn Credit</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Control a room in the library or labs? List your unused slots, help other students study, and receive points or monetary compensation.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {perks.map((perk, i) => (
+              <motion.div
+                key={perk.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group bg-card p-7 rounded-2xl border border-border shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className={`w-12 h-12 ${perk.bg} ${perk.iconColor} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                  <perk.icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">{perk.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{perk.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 4. EXTRA STATIC SECTION 2 - HOW IT WORKS */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-white">
-            Three Steps To Success
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">
-            Learn how quickly you can secure your workspace and get to studying.
+      {/* ─── HOW IT WORKS ─────────────────────────────────── */}
+      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center max-w-3xl mx-auto mb-16 space-y-4"
+        >
+          <p className="text-xs font-bold text-primary uppercase tracking-widest">
+            How It Works
           </p>
-        </div>
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
+            Three steps to success
+          </h2>
+          <p className="text-muted leading-relaxed">
+            Learn how quickly you can secure your workspace and get studying in under 2 minutes.
+          </p>
+        </motion.div>
 
-        <div className="relative">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
           {/* Connecting line on desktop */}
-          <div className="hidden lg:block absolute top-1/2 left-4 flex-1 w-[calc(100%-32px)] h-0.5 bg-slate-200 dark:bg-slate-850 -translate-y-1/2 z-0"></div>
+          <div className="hidden lg:block absolute top-8 left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] h-0.5 bg-gradient-to-r from-primary/20 via-indigo-500/20 to-primary/20 z-0" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 relative z-10">
-            {/* Step 1 */}
-            <div className="flex flex-col items-center text-center space-y-4 bg-white dark:bg-slate-900 lg:bg-transparent lg:dark:bg-transparent p-6 lg:p-0 rounded-2xl border border-slate-200/40 lg:border-none">
-              <div className="h-12 w-12 rounded-full bg-primary-600 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-primary-500/20 border-4 border-white dark:border-slate-950">
-                1
+          {steps.map((step, i) => (
+            <motion.div
+              key={step.num}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.15 }}
+              className="relative z-10 flex flex-col items-center text-center space-y-4"
+            >
+              <div className={`h-16 w-16 rounded-full ${step.color} text-white font-black text-xl flex items-center justify-center shadow-xl border-4 border-white dark:border-slate-950`}>
+                {step.num}
               </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Discover Study Nooks</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-                Filter spaces by capacity, floor, hourly rate, or required amenities like whiteboard or high-speed Wi-Fi.
-              </p>
-            </div>
+              <div className="bg-card rounded-2xl border border-border p-6 w-full shadow-sm">
+                <h3 className="text-base font-bold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{step.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-            {/* Step 2 */}
-            <div className="flex flex-col items-center text-center space-y-4 bg-white dark:bg-slate-900 lg:bg-transparent lg:dark:bg-transparent p-6 lg:p-0 rounded-2xl border border-slate-200/40 lg:border-none">
-              <div className="h-12 w-12 rounded-full bg-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 border-4 border-white dark:border-slate-950">
-                2
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Reserve Your Slots</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-                Pick a slot date and hour range. Real-time cost updates. Confirm with conflict resolution.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="flex flex-col items-center text-center space-y-4 bg-white dark:bg-slate-900 lg:bg-transparent lg:dark:bg-transparent p-6 lg:p-0 rounded-2xl border border-slate-200/40 lg:border-none">
-              <div className="h-12 w-12 rounded-full bg-violet-600 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-violet-500/20 border-4 border-white dark:border-slate-950">
-                3
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Unlock & Excel</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-                Access your bookings dashboard, check details, walk in, hook up your screens, and start collaborating.
-              </p>
-            </div>
-          </div>
+      {/* ─── CTA BANNER ───────────────────────────────────── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary to-indigo-600 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-3xl mx-auto text-center space-y-6 relative z-10">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl sm:text-4xl font-black text-white tracking-tight"
+          >
+            Ready to find your focus zone?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-white/80 text-lg"
+          >
+            Join hundreds of students booking smarter with StudyNook.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex flex-col sm:flex-row gap-3 justify-center"
+          >
+            <Link
+              href="/rooms"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-primary font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            >
+              Find a Room
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border-2 border-white/40 hover:border-white/80 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-200"
+            >
+              Create Free Account
+            </Link>
+          </motion.div>
         </div>
       </section>
     </div>

@@ -3,32 +3,30 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Loader from "@/components/Loader";
 import BookingModal from "@/components/BookingModal";
-import { 
-  MapPin, Users, DollarSign, Layers, CheckSquare, 
-  Trash2, Edit, CalendarDays, ArrowLeft, ShieldCheck, 
-  Sparkles, CheckCircle2, AlertTriangle, X 
+import Modal from "@/components/Modal";
+import Button from "@/components/Button";
+import {
+  MapPin, Users, DollarSign, CheckCircle2,
+  Trash2, Edit, CalendarDays, ArrowLeft, ShieldCheck,
+  AlertTriangle, CheckSquare, X
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 export default function RoomDetails({ params }) {
   const resolvedParams = React.use(params);
   const id = resolvedParams.id;
 
-  const { 
-    rooms, currentUser, updateRoom, deleteRoom, loading 
-  } = useApp();
+  const { rooms, currentUser, updateRoom, deleteRoom, loading } = useApp();
   const router = useRouter();
 
   const [room, setRoom] = useState(null);
-  
-  // Modal states
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Edit form states
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editImage, setEditImage] = useState("");
@@ -36,19 +34,19 @@ export default function RoomDetails({ params }) {
   const [editCapacity, setEditCapacity] = useState("");
   const [editHourlyRate, setEditHourlyRate] = useState("");
   const [editAmenities, setEditAmenities] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const amenitiesOptions = [
-    "Whiteboard", "Projector", "Wi-Fi", 
+    "Whiteboard", "Projector", "Wi-Fi",
     "Power Outlets", "Quiet Zone", "Air Conditioning"
   ];
 
-  // Find room once rooms data is loaded
   useEffect(() => {
     if (!loading && rooms.length > 0) {
       const found = rooms.find((r) => r.id === id);
       if (found) {
         setRoom(found);
-        // Pre-fill edit form
         setEditName(found.name);
         setEditDescription(found.description);
         setEditImage(found.image);
@@ -56,9 +54,7 @@ export default function RoomDetails({ params }) {
         setEditCapacity(String(found.capacity));
         setEditHourlyRate(String(found.hourlyRate));
         setEditAmenities(found.amenities);
-
-        // Set Tab Title
-        document.title = `StudyNook – ${found.name}`;
+        document.title = `StudyNook — ${found.name}`;
       } else {
         toast.error("Room not found.");
         router.push("/rooms");
@@ -67,30 +63,26 @@ export default function RoomDetails({ params }) {
   }, [id, rooms, loading, router]);
 
   if (loading || !room) {
-    return <LoadingSpinner message="Gathering room specifications..." />;
+    return <Loader message="Gathering room specifications..." />;
   }
 
   const isOwner = currentUser && room.ownerId === currentUser.id;
 
-  // Edit Room submit
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-
     if (parseFloat(editHourlyRate) < 0 || parseInt(editCapacity) < 1) {
       toast.error("Invalid hourly rate or seat capacity.");
       return;
     }
-
+    setIsSaving(true);
     const res = await updateRoom(room.id, {
-      name: editName,
-      description: editDescription,
-      image: editImage,
-      floor: editFloor,
+      name: editName, description: editDescription,
+      image: editImage, floor: editFloor,
       capacity: parseInt(editCapacity),
       hourlyRate: parseFloat(editHourlyRate),
       amenities: editAmenities
     });
-
+    setIsSaving(false);
     if (res.success) {
       toast.success("Room updated successfully!");
       setShowEditModal(false);
@@ -99,9 +91,10 @@ export default function RoomDetails({ params }) {
     }
   };
 
-  // Delete Room action
   const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
     const res = await deleteRoom(room.id);
+    setIsDeleting(false);
     if (res.success) {
       toast.success("Room deleted successfully.");
       router.push("/my-listings");
@@ -110,321 +103,257 @@ export default function RoomDetails({ params }) {
     }
   };
 
-  // Toggle Amenity Checkbox
   const handleAmenityToggle = (amenity) => {
-    if (editAmenities.includes(amenity)) {
-      setEditAmenities(editAmenities.filter((a) => a !== amenity));
-    } else {
-      setEditAmenities([...editAmenities, amenity]);
-    }
+    setEditAmenities(prev =>
+      prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]
+    );
   };
 
+  const inputCls = "w-full px-3 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition";
+
   return (
-    <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full animate-fade-in space-y-6">
-      {/* Back button */}
+    <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6">
+      {/* Back */}
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-primary transition-colors group"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
         Back
       </button>
 
-      {/* Main Details Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-2">
-        {/* Left Column: Image & Amenities list */}
-        <div className="p-6 sm:p-8 space-y-6 border-r border-slate-100 dark:border-slate-850">
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/20 shadow-sm">
+      {/* Main grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start"
+      >
+        {/* Left: Image + Amenities */}
+        <div className="lg:col-span-3 space-y-5">
+          <div className="relative rounded-2xl overflow-hidden bg-background border border-border shadow-sm">
             <img
               src={room.image}
               alt={room.name}
-              className="w-full h-full object-cover"
+              className="w-full aspect-video object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            {isOwner && (
+              <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-sm text-white text-xs font-bold rounded-full">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                Your Listing
+              </div>
+            )}
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-              Room Amenities
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {room.amenities.map((amenity) => (
-                <div
-                  key={amenity}
-                  className="flex items-center gap-2 text-sm text-slate-650 dark:text-slate-350 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border border-slate-200/30 dark:border-slate-800"
-                >
-                  <CheckCircle2 className="h-4.5 w-4.5 text-primary-500 flex-shrink-0" />
-                  <span className="font-semibold">{amenity}</span>
-                </div>
-              ))}
-              {room.amenities.length === 0 && (
-                <p className="text-slate-450 text-sm">No special amenities listed.</p>
-              )}
-            </div>
+          {/* Amenities */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-4">Room Amenities</h3>
+            {room.amenities.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2.5">
+                {room.amenities.map((amenity) => (
+                  <div
+                    key={amenity}
+                    className="flex items-center gap-2 text-sm text-foreground bg-background px-3 py-2 rounded-xl border border-border"
+                  >
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="font-medium">{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted">No special amenities listed.</p>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Descriptions, Booking Stats, and CTAs */}
-        <div className="p-6 sm:p-8 flex flex-col justify-between">
-          <div className="space-y-6">
-            {/* Header tags */}
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="bg-black/60 dark:bg-slate-950 border border-white/10 text-white text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />
+        {/* Right: Info + Booking */}
+        <div className="lg:col-span-2 space-y-5">
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-background text-foreground text-xs font-semibold rounded-full border border-border">
+                <MapPin className="h-3.5 w-3.5 text-primary" />
                 {room.floor}
               </span>
-              <span className="bg-primary-50 dark:bg-primary-950/30 text-primary-600 dark:text-primary-400 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
                 <Users className="h-3.5 w-3.5" />
-                Seat Capacity: {room.capacity}
+                {room.capacity} seats
               </span>
             </div>
 
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white leading-snug">
+            {/* Name */}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground leading-tight">
                 {room.name}
               </h1>
-              {isOwner && (
-                <div className="inline-flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 font-bold bg-primary-50 dark:bg-primary-950/20 px-2 py-0.5 rounded-full">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Your Listing
-                </div>
-              )}
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Description</h3>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-350 leading-relaxed font-medium">
+            <div>
+              <p className="text-sm text-muted leading-relaxed">
                 {room.description}
               </p>
             </div>
 
-            {/* Booking Stat Panel */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 rounded-2xl p-4 grid grid-cols-2 gap-4 border border-slate-100 dark:border-slate-850">
-              <div className="text-center border-r border-slate-200 dark:border-slate-800 py-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Hourly rate</p>
-                <p className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white mt-1 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-accent-gold" />
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-background border border-border/50 rounded-xl p-4 text-center">
+                <p className="text-[10px] font-bold text-muted uppercase tracking-wide mb-1">Hourly Rate</p>
+                <p className="text-2xl font-black text-foreground flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-amber-500" />
                   {room.hourlyRate}
                 </p>
               </div>
-              <div className="text-center py-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Times booked</p>
-                <p className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white mt-1 flex items-center justify-center gap-1.5">
-                  <CalendarDays className="h-5 w-5 text-primary-500" />
+              <div className="bg-background border border-border/50 rounded-xl p-4 text-center">
+                <p className="text-[10px] font-bold text-muted uppercase tracking-wide mb-1">Times Booked</p>
+                <p className="text-2xl font-black text-foreground flex items-center justify-center gap-1.5">
+                  <CalendarDays className="h-5 w-5 text-primary" />
                   {room.bookingCount || 0}
                 </p>
               </div>
             </div>
-          </div>
 
-          {/* Action button panel */}
-          <div className="pt-8 border-t border-slate-100 dark:border-slate-850 mt-8 flex flex-col gap-3">
-            {isOwner ? (
-              /* OWNER PANEL */
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => setShowEditModal(true)}
-                  className="flex items-center justify-center gap-1.5 py-3.5 border border-primary-200 dark:border-primary-900/60 font-bold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/20 rounded-xl transition duration-150 cursor-pointer"
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit Room
-                </button>
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center justify-center gap-1.5 py-3.5 bg-red-600 hover:bg-red-700 font-bold text-white rounded-xl shadow-lg shadow-red-500/10 active:scale-95 transition cursor-pointer"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete Room
-                </button>
-              </div>
-            ) : (
-              /* BOOK NOW ACTION */
-              currentUser ? (
-                <button
+            {/* Actions */}
+            <div className="pt-2 border-t border-border">
+              {isOwner ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    leftIcon={Edit}
+                    onClick={() => setShowEditModal(true)}
+                    className="w-full"
+                  >
+                    Edit Room
+                  </Button>
+                  <Button
+                    variant="danger"
+                    leftIcon={Trash2}
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full"
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ) : currentUser ? (
+                <Button
+                  variant="primary"
+                  size="lg"
+                  leftIcon={CalendarDays}
                   onClick={() => setShowBookingModal(true)}
-                  className="w-full py-4 bg-primary-600 hover:bg-primary-700 font-bold text-white rounded-xl shadow-xl shadow-primary-500/20 hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 text-base"
+                  className="w-full text-base"
                 >
-                  <CalendarDays className="h-5 w-5" />
-                  Book Now
-                </button>
+                  Book This Room
+                </Button>
               ) : (
-                <button
+                <Button
+                  variant="primary"
+                  size="lg"
                   onClick={() => router.push(`/login?redirect=/rooms/${room.id}`)}
-                  className="w-full py-4 bg-slate-800 hover:bg-slate-700 dark:bg-slate-750 dark:hover:bg-slate-700 font-bold text-white rounded-xl shadow-xl hover:scale-[1.01] active:scale-[0.99] transition duration-150 cursor-pointer flex items-center justify-center gap-1.5 text-base"
+                  className="w-full text-base"
                 >
-                  Login to Book
-                </button>
-              )
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* MODAL 1: BOOKING MODAL */}
-      {showBookingModal && (
-        <BookingModal
-          room={room}
-          onClose={() => setShowBookingModal(false)}
-        />
-      )}
-
-      {/* MODAL 2: EDIT MODAL */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-850 animate-slide-up">
-            <div className="flex justify-between items-center px-6 py-4 bg-slate-50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="font-extrabold text-slate-800 dark:text-white">Edit Room Listing</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              >
-                <X className="h-5 w-5" />
-              </button>
+                  Sign In to Book
+                </Button>
+              )}
             </div>
-
-            <form onSubmit={handleEditSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase">Room Name</label>
-                <input
-                  type="text"
-                  required
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase">Description</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase">Image URL</label>
-                <input
-                  type="url"
-                  required
-                  value={editImage}
-                  onChange={(e) => setEditImage(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1.5 col-span-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Floor</label>
-                  <input
-                    type="text"
-                    required
-                    value={editFloor}
-                    onChange={(e) => setEditFloor(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div className="space-y-1.5 col-span-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Capacity</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    value={editCapacity}
-                    onChange={(e) => setEditCapacity(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div className="space-y-1.5 col-span-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Hourly Rate ($)</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={editHourlyRate}
-                    onChange={(e) => setEditHourlyRate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase block">Amenities</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {amenitiesOptions.map((amenity) => {
-                    const checked = editAmenities.includes(amenity);
-                    return (
-                      <button
-                        type="button"
-                        key={amenity}
-                        onClick={() => handleAmenityToggle(amenity)}
-                        className="flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 w-full text-left"
-                      >
-                        {checked ? (
-                          <CheckSquare className="h-4.5 w-4.5 text-primary-600 dark:text-primary-400" />
-                        ) : (
-                          <div className="h-4.5 w-4.5 rounded border border-slate-350 dark:border-slate-700" />
-                        )}
-                        <span>{amenity}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 border border-slate-200 dark:border-slate-800 font-semibold rounded-xl text-slate-650 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-primary-600 hover:bg-primary-750 text-white font-bold rounded-xl text-sm transition"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
           </div>
         </div>
+      </motion.div>
+
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <BookingModal room={room} onClose={() => setShowBookingModal(false)} />
       )}
 
-      {/* MODAL 3: DELETE CONFIRMATION */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-slate-850 animate-slide-up text-center space-y-5">
-            <div className="mx-auto p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-full w-fit">
-              <AlertTriangle className="h-8 w-8" />
+      {/* Edit Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Room Listing"
+        subtitle={room.name}
+        maxWidth="max-w-lg"
+      >
+        <form onSubmit={handleEditSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider">Room Name</label>
+            <input type="text" required value={editName} onChange={(e) => setEditName(e.target.value)} className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider">Description</label>
+            <textarea required rows={3} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className={inputCls + " resize-none"} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider">Image URL</label>
+            <input type="url" required value={editImage} onChange={(e) => setEditImage(e.target.value)} className={inputCls} />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted uppercase tracking-wider">Floor</label>
+              <input type="text" required value={editFloor} onChange={(e) => setEditFloor(e.target.value)} className={inputCls} />
             </div>
             <div className="space-y-1.5">
-              <h3 className="font-extrabold text-lg text-slate-800 dark:text-white">Delete Room Listing?</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
-                Are you sure you want to permanently delete <strong className="text-slate-700 dark:text-slate-250"> {room.name}</strong>? This action cannot be undone.
-              </p>
+              <label className="text-[11px] font-bold text-muted uppercase tracking-wider">Capacity</label>
+              <input type="number" required min="1" value={editCapacity} onChange={(e) => setEditCapacity(e.target.value)} className={inputCls} />
             </div>
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="py-2.5 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-850 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                className="py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl shadow-md transition"
-              >
-                Confirm Delete
-              </button>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted uppercase tracking-wider">Rate ($/hr)</label>
+              <input type="number" required min="0" value={editHourlyRate} onChange={(e) => setEditHourlyRate(e.target.value)} className={inputCls} />
             </div>
           </div>
+          <div className="space-y-2.5">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider block">Amenities</label>
+            <div className="grid grid-cols-2 gap-2">
+              {amenitiesOptions.map((amenity) => {
+                const checked = editAmenities.includes(amenity);
+                return (
+                  <button
+                    type="button"
+                    key={amenity}
+                    onClick={() => handleAmenityToggle(amenity)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${
+                      checked
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted border border-border hover:border-primary/45"
+                    }`}
+                  >
+                    <div className={`h-4 w-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${checked ? "bg-primary border-primary" : "border-border"}`}>
+                      {checked && <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    </div>
+                    {amenity}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2 border-t border-border">
+            <Button variant="secondary" type="button" onClick={() => setShowEditModal(false)}>Cancel</Button>
+            <Button variant="primary" type="submit" isLoading={isSaving}>Save Changes</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirm Modal */}
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        maxWidth="max-w-sm"
+      >
+        <div className="p-6 text-center space-y-5">
+          <div className="mx-auto w-fit p-4 bg-red-50 dark:bg-red-950/20 rounded-2xl">
+            <AlertTriangle className="h-8 w-8 text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Delete Room Listing?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-slate-700 dark:text-slate-200">{room.name}</strong>? This cannot be undone.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)} className="w-full">Cancel</Button>
+            <Button variant="danger" onClick={handleDeleteConfirm} isLoading={isDeleting} className="w-full">Delete</Button>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

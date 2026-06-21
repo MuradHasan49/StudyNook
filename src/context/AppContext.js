@@ -18,7 +18,6 @@ export const AppContextProvider = ({ children }) => {
   const getAuthToken = async () => {
     try {
       const res = await authClient.token();
-      console.log(res)
       if (res && res.data) {
         return res.data.token;
       }
