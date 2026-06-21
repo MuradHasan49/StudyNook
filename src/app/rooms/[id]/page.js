@@ -43,27 +43,35 @@ export default function RoomDetails({ params }) {
   ];
 
   useEffect(() => {
-    if (!loading && rooms.length > 0) {
-      const found = rooms.find((r) => r.id === id);
-      if (found) {
-        setRoom(found);
-        setEditName(found.name);
-        setEditDescription(found.description);
-        setEditImage(found.image);
-        setEditFloor(found.floor);
-        setEditCapacity(String(found.capacity));
-        setEditHourlyRate(String(found.hourlyRate));
-        setEditAmenities(found.amenities);
-        document.title = `StudyNook — ${found.name}`;
-      } else {
-        toast.error("Room not found.");
-        router.push("/rooms");
+    if (!loading) {
+      if (!currentUser) {
+        toast.error("Please login to view room details.");
+        router.push(`/login?redirect=/rooms/${id}`);
+        return;
+      }
+
+      if (rooms.length > 0) {
+        const found = rooms.find((r) => r.id === id);
+        if (found) {
+          setRoom(found);
+          setEditName(found.name);
+          setEditDescription(found.description);
+          setEditImage(found.image);
+          setEditFloor(found.floor);
+          setEditCapacity(String(found.capacity));
+          setEditHourlyRate(String(found.hourlyRate));
+          setEditAmenities(found.amenities);
+          document.title = `StudyNook — ${found.name}`;
+        } else {
+          toast.error("Room not found.");
+          router.push("/rooms");
+        }
       }
     }
-  }, [id, rooms, loading, router]);
+  }, [id, rooms, loading, router, currentUser]);
 
-  if (loading || !room) {
-    return <Loader message="Gathering room specifications..." />;
+  if (loading || !currentUser || !room) {
+    return <Loader message="Checking authorization and gathering room specifications..." />;
   }
 
   const isOwner = currentUser && room.ownerId === currentUser.id;
