@@ -225,22 +225,33 @@ export default function RoomDetails({ params }) {
             {/* Actions */}
             <div className="pt-2 border-t border-border">
               {isOwner ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      leftIcon={Edit}
+                      onClick={() => setShowEditModal(true)}
+                      className="w-full"
+                    >
+                      Edit Room
+                    </Button>
+                    <Button
+                      variant="danger"
+                      leftIcon={Trash2}
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="w-full"
+                    >
+                      Delete
+                    </Button>
+                  </div>
                   <Button
-                    variant="outline"
-                    leftIcon={Edit}
-                    onClick={() => setShowEditModal(true)}
-                    className="w-full"
+                    variant="primary"
+                    size="lg"
+                    leftIcon={CalendarDays}
+                    onClick={() => setShowBookingModal(true)}
+                    className="w-full text-base"
                   >
-                    Edit Room
-                  </Button>
-                  <Button
-                    variant="danger"
-                    leftIcon={Trash2}
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full"
-                  >
-                    Delete
+                    Book This Room
                   </Button>
                 </div>
               ) : currentUser ? (
