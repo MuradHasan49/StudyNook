@@ -19,11 +19,14 @@ import { motion } from "framer-motion";
 const StatusBadge = ({ status }) => {
   const isConfirmed = status === "confirmed";
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-      isConfirmed
-        ? "bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900"
-        : "bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900"
-    }`}>
+    <span
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border"
+      style={{
+        backgroundColor: isConfirmed ? 'var(--success-bg)' : 'var(--error-bg)',
+        color: isConfirmed ? 'var(--success-text)' : 'var(--error-text)',
+        borderColor: isConfirmed ? 'var(--success-border)' : 'var(--error-border)'
+      }}
+    >
       {isConfirmed
         ? <CheckCircle className="h-3 w-3" />
         : <Ban className="h-3 w-3" />
@@ -108,9 +111,15 @@ export default function MyBookings() {
       {/* Stats row */}
       {myBookings.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:max-w-xs">
-          <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-green-700 dark:text-green-400">{confirmedCount}</p>
-            <p className="text-xs font-semibold text-green-600 dark:text-green-400 mt-0.5">Confirmed</p>
+          <div
+            className="border rounded-2xl p-4 text-center"
+            style={{
+              backgroundColor: 'var(--success-bg)',
+              borderColor: 'var(--success-border)'
+            }}
+          >
+            <p className="text-2xl font-black" style={{ color: 'var(--success-text)' }}>{confirmedCount}</p>
+            <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--success-text)' }}>Confirmed</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 text-center">
             <p className="text-2xl font-black text-foreground">{myBookings.length - confirmedCount}</p>
@@ -139,7 +148,7 @@ export default function MyBookings() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 dark:bg-slate-950/60 border-b border-border">
+                <tr className="bg-black/5 dark:bg-white/5 border-b border-border">
                   {["Room", "Date", "Time Slot", "Total Cost", "Status", "Actions"].map((h) => (
                     <th key={h} className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted">
                       {h}
@@ -157,7 +166,7 @@ export default function MyBookings() {
                   const confirmed = booking.status === "confirmed";
 
                   return (
-                    <tr key={booking.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/20 transition-colors">
+                    <tr key={booking.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <img src={room.image} alt={room.name} className="h-10 w-16 object-cover rounded-lg border border-border/50 flex-shrink-0" />
@@ -189,7 +198,12 @@ export default function MyBookings() {
                         {confirmed && future ? (
                           <button
                             onClick={() => handleCancelClick(booking.id)}
-                            className="px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-lg transition-colors"
+                            className="px-3 py-1.5 text-xs font-bold border rounded-lg transition-colors hover:opacity-80"
+                            style={{
+                              backgroundColor: 'var(--error-bg)',
+                              color: 'var(--error-text)',
+                              borderColor: 'var(--error-border)'
+                            }}
                           >
                             Cancel
                           </button>
@@ -245,7 +259,12 @@ export default function MyBookings() {
                   {confirmed && future && (
                     <button
                       onClick={() => handleCancelClick(booking.id)}
-                      className="w-full py-2.5 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl transition-colors"
+                      className="w-full py-2.5 text-xs font-bold border rounded-xl transition-colors hover:opacity-80"
+                      style={{
+                        backgroundColor: 'var(--error-bg)',
+                        color: 'var(--error-text)',
+                        borderColor: 'var(--error-border)'
+                      }}
                     >
                       Cancel Booking
                     </button>
@@ -264,8 +283,11 @@ export default function MyBookings() {
         maxWidth="max-w-sm"
       >
         <div className="p-6 text-center space-y-5">
-          <div className="mx-auto w-fit p-4 bg-red-50 dark:bg-red-950/20 rounded-2xl">
-            <ShieldAlert className="h-8 w-8 text-red-500" />
+          <div
+            className="mx-auto w-fit p-4 rounded-2xl"
+            style={{ backgroundColor: 'var(--error-bg)' }}
+          >
+            <ShieldAlert className="h-8 w-8" style={{ color: 'var(--error-text)' }} />
           </div>
           <div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">Cancel Reservation?</h3>

@@ -77,7 +77,7 @@ export default function NotFound() {
         </Link>
         <Link
           href="/rooms"
-          className="inline-flex items-center justify-center gap-2 px-7 py-3.5 border border-border text-foreground font-semibold rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-all duration-200"
+          className="inline-flex items-center justify-center gap-2 px-7 py-3.5 border border-border text-foreground font-semibold rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200"
         >
           Browse Rooms
         </Link>

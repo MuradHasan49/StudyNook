@@ -53,7 +53,7 @@ export default function Modal({ isOpen, onClose, title, subtitle, children, maxW
             >
               {/* Header */}
               {(title || subtitle) && (
-                <div className="flex items-start justify-between px-6 py-4 border-b border-border bg-slate-50/50 dark:bg-slate-950/50">
+                <div className="flex items-start justify-between px-6 py-4 border-b border-border bg-black/5 dark:bg-white/5">
                   <div>
                     {title && (
                       <h2 className="font-bold text-lg text-foreground">

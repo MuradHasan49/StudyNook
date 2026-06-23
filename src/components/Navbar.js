@@ -8,7 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, LogOut, PlusCircle,
-  Calendar, List, ChevronDown
+  Calendar, List, ChevronDown, Home, LayoutGrid
 } from "lucide-react";
 import LogoIcon from "@/components/LogoIcon";
 
@@ -44,8 +44,8 @@ export default function Navbar() {
   const isActive = (path) => pathname === path;
 
   const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Rooms", href: "/rooms" },
+    { label: "Home", href: "/", icon: Home },
+    { label: "Rooms", href: "/rooms", icon: LayoutGrid },
   ];
 
   const privateLinks = [
@@ -69,9 +69,10 @@ export default function Navbar() {
               <LogoIcon className="h-6 w-6" />
               <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse border border-slate-100 dark:border-slate-950" />
             </div>
-            <span className="font-black text-2xl tracking-tight bg-gradient-to-r from-primary via-violet-600 to-indigo-600 dark:from-primary dark:via-violet-400 dark:to-indigo-400 bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
-              Study<span className="text-slate-900 dark:text-white">Nook</span>
-            </span>
+            <div className="flex items-center font-black text-2xl tracking-tight group-hover:opacity-90 transition-opacity">
+              <span className="bg-gradient-to-r from-primary via-violet-600 to-indigo-600 dark:from-primary dark:via-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">Study</span>
+              <span className="text-foreground">Nook</span>
+            </div>
           </Link>
 
           {/* Desktop Nav Links */}
@@ -80,12 +81,13 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   isActive(link.href)
                     ? "text-primary"
-                    : "text-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                    : "text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                 }`}
               >
+                <link.icon className="h-4 w-4" />
                 {link.label}
                 {isActive(link.href) && (
                   <motion.div
@@ -103,7 +105,7 @@ export default function Navbar() {
                 className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   isActive(link.href)
                     ? "text-primary"
-                    : "text-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                    : "text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                 }`}
               >
                 <link.icon className="h-4 w-4" />
@@ -128,7 +130,7 @@ export default function Navbar() {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   aria-haspopup="true"
                   aria-expanded={dropdownOpen}
-                  className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors duration-200"
+                  className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200"
                 >
                   <img
                     src={currentUser.photoUrl}
@@ -155,7 +157,7 @@ export default function Navbar() {
                       className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-xl overflow-hidden"
                     >
                       {/* User info */}
-                      <div className="px-4 py-3 border-b border-border bg-slate-50/50 dark:bg-slate-900/50">
+                      <div className="px-4 py-3 border-b border-border bg-black/5 dark:bg-white/5">
                         <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Signed in as</p>
                         <p className="text-sm font-bold text-foreground truncate mt-0.5">{currentUser.name}</p>
                         <p className="text-[11px] text-muted truncate">{currentUser.email}</p>
@@ -166,7 +168,7 @@ export default function Navbar() {
                           <Link
                             key={link.href}
                             href={link.href}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-primary transition-colors"
                           >
                             <link.icon className="h-4 w-4" />
                             {link.label}
@@ -211,7 +213,7 @@ export default function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-xl text-foreground/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {mobileMenuOpen ? (
@@ -244,12 +246,13 @@ export default function Navbar() {
                 <motion.div key={link.href} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
                   <Link
                     href={link.href}
-                    className={`block px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors border-l-2 ${
+                    className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors border-l-2 ${
                       isActive(link.href)
                         ? "border-l-primary bg-primary/10 text-primary"
-                        : "border-l-transparent text-muted hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-800"
+                        : "border-l-transparent text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                     }`}
                   >
+                    <link.icon className="h-4 w-4" />
                     {link.label}
                   </Link>
                 </motion.div>
@@ -267,7 +270,7 @@ export default function Navbar() {
                         className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors border-l-2 ${
                           isActive(link.href)
                             ? "border-l-primary bg-primary/10 text-primary"
-                            : "border-l-transparent text-muted hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-800"
+                            : "border-l-transparent text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                         }`}
                       >
                         <link.icon className="h-4 w-4" />
@@ -279,7 +282,7 @@ export default function Navbar() {
               )}
             </div>
 
-            <div className="border-t border-border px-4 py-3 bg-slate-50/50 dark:bg-slate-950/50">
+            <div className="border-t border-border px-4 py-3 bg-black/5 dark:bg-white/5">
               {currentUser ? (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -299,7 +302,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  <Link href="/login" className="flex items-center justify-center px-4 py-2.5 border border-border text-sm font-semibold text-foreground rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <Link href="/login" className="flex items-center justify-center px-4 py-2.5 border border-border text-sm font-semibold text-foreground rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     Sign In
                   </Link>
                   <Link href="/register" className="flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-xl transition-colors">

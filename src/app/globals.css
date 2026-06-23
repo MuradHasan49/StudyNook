@@ -98,6 +98,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   /* Global Theme Variables */
   --background: #090d16;
   --foreground: #f8fafc;

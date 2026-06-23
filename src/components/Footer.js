@@ -23,7 +23,7 @@ export default function Footer() {
                 StudyNook
               </span>
             </Link>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm">
+            <p className="text-sm text-foreground/70 leading-relaxed max-w-sm">
               Find, book, and list premium study rooms in university and public libraries. Facilitating collaborative knowledge exchange in quiet, productive environments.
             </p>
             {/* Mini CTA */}
@@ -38,7 +38,7 @@ export default function Footer() {
 
           {/* Useful Links */}
           <div>
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">
+            <h3 className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-5">
               Navigation
             </h3>
             <ul className="space-y-3">
@@ -52,7 +52,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    className="text-sm text-foreground/70 hover:text-primary transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -63,24 +63,24 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">
+            <h3 className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-5">
               Contact Us
             </h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-2.5 text-sm text-slate-500 dark:text-slate-400">
-                <div className="p-1.5 bg-primary-50 dark:bg-primary-950/30 rounded-lg">
-                  <Mail className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400" />
+              <div className="flex items-center gap-2.5 text-sm text-foreground/70">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                  <Mail className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <span>support@studynook.com</span>
               </div>
-              <div className="flex items-center gap-2.5 text-sm text-slate-500 dark:text-slate-400">
-                <div className="p-1.5 bg-primary-50 dark:bg-primary-950/30 rounded-lg">
-                  <Phone className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400" />
+              <div className="flex items-center gap-2.5 text-sm text-foreground/70">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                  <Phone className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <span>+88012-34567890</span>
               </div>
-              <div className="flex items-start gap-2.5 text-sm text-slate-500 dark:text-slate-400">
-                <div className="p-1.5 bg-primary-50 dark:bg-primary-950/30 rounded-lg flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-2.5 text-sm text-foreground/70">
+                <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0 mt-0.5">
                   <MapPin className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <span>University Central Library, Floor 3</span>
@@ -91,8 +91,8 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">
-            © {year} <span className="font-semibold text-slate-500 dark:text-slate-400">StudyNook</span>. All rights reserved.
+          <p className="text-xs text-foreground/50">
+            © {year} <span className="font-semibold text-foreground/70">StudyNook</span>. All rights reserved.
           </p>
 
           {/* Social links */}
@@ -120,7 +120,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.label}
-                className="p-2 rounded-lg text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-lg text-foreground/50 hover:text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
                   <path d={social.path} />

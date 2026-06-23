@@ -428,7 +428,7 @@ export default function Home() {
               <div className={`h-16 w-16 rounded-full ${step.color} text-white font-black text-xl flex items-center justify-center shadow-xl border-4 border-white dark:border-slate-950`}>
                 {step.num}
               </div>
-              <div className="bg-card rounded-2xl border border-border p-6 w-full shadow-sm">
+              <div className="bg-card rounded-2xl border border-border p-6 w-full shadow-sm flex-1 flex flex-col">
                 <h3 className="text-base font-bold text-foreground mb-2">{step.title}</h3>
                 <p className="text-sm text-muted leading-relaxed">{step.desc}</p>
               </div>

@@ -65,8 +65,8 @@ export default function MyListings() {
         >
           {[
             { label: "Total Listings", value: myListings.length, icon: BookOpen, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Total Bookings", value: totalBookings, icon: BarChart2, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50/60 dark:bg-indigo-950/20" },
-            { label: "Avg. Bookings", value: myListings.length ? (totalBookings / myListings.length).toFixed(1) : "—", icon: ArrowRight, color: "text-violet-650 dark:text-violet-400", bg: "bg-violet-50/60 dark:bg-violet-950/20" },
+            { label: "Total Bookings", value: totalBookings, icon: BarChart2, color: "text-primary", bg: "bg-primary/10" },
+            { label: "Avg. Bookings", value: myListings.length ? (totalBookings / myListings.length).toFixed(1) : "—", icon: ArrowRight, color: "text-primary", bg: "bg-primary/10" },
           ].map((stat) => (
             <div key={stat.label} className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4">
               <div className={`p-3 ${stat.bg} rounded-xl flex-shrink-0`}>
