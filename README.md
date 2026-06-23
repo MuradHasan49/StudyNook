@@ -2,7 +2,7 @@
 
 StudyNook is a premium, full-stack study room booking system designed for university libraries and cooperative workspaces. Students can easily browse available learning spaces, filter listings based on capacity, floor, or necessary amenities (such as whiteboards and projectors), and lock in their reservations with real-time conflict-free slot validation. Study room owners can easily create, manage, and edit their listings.
 
-**Live Client URL**: [https://studynook-client.vercel.app](https://studynook-client.vercel.app)
+**Live Client URL**: [https://study-nook-gold.vercel.app/](https://study-nook-gold.vercel.app/)
 
 ---
 
