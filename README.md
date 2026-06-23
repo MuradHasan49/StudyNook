@@ -106,7 +106,7 @@ To run this project locally, create `.env` files in both the client and server d
 
 > **Warning:** Never expose environment variables publicly!
 
-### Client (`.env.local`)
+### Client (`.env`)
 ```env
 NEXT_PUBLIC_API_URL=
 BETTER_AUTH_SECRET=
